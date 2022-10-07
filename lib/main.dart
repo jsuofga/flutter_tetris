@@ -29,12 +29,14 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool showGameGrid = true;
+  bool showPlayButton = true;
   int count = 0;
   int totalSquares = 180;
   String rotateDirection = '';
   int rotationCount = 0; // tracks number of rotations.
   int newPieceID  = 0;  // the index (0-6) of the newPiece seleceted from tetronomePieces
   int rowsClearCount = 0;
+  int score = 0;
 
 
   static List topRow = [0,1,2,3,4,5,6,7,8,9];
@@ -101,6 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
     landedPiecesColors = [];
     count = 0;
     showGameGrid = true;
+    score = 0;
     startGame();
   }
 
@@ -287,6 +290,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
 
       setState(() {
+        score += 10;
         landedPieces;
         landedPiecesColors;
       });
@@ -328,6 +332,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     void startGame() {
+    showPlayButton = false;
 
      var posColor = {'position':0, 'color':Colors.white};  // declare an object to store position and the color
      choosePiece();
@@ -368,146 +373,168 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Scaffold(
           backgroundColor: Colors.blueGrey,
           body: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-               Stack(
-                 alignment: Alignment.center,
-                 children: [
+            child: Center(
+              child: Container(
 
-                   GestureDetector(
-                   onTap: () {
-                     print('rotate');
-                   },
-                   onHorizontalDragStart: (details) {
-                     print(details);
-                   },
-                   onHorizontalDragUpdate: (details) {
-                       print(details);
-                     if (details.delta.dx > 0) {
-                      moveRight();
-                     } else {
-                        moveLeft();
-                     }
-                   },
-                   child: Container(
-                     child: GridView.builder(
-                         shrinkWrap: true, //do not use up the entire allowable space of parent
-                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                             childAspectRatio: 1.05,
-                             crossAxisCount: 10,
-                             //number of columns
-                             crossAxisSpacing: 1,
-                             //gap spacing horizontal between grid elements
-                             mainAxisSpacing: 1 //gap spacing vertical between grid elements
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                   Stack(
+                     alignment: Alignment.center,
+                     children: [
+                       GestureDetector(
+                       onTap: () {
+                         print('rotate');
+                       },
+                       onHorizontalDragStart: (details) {
+                         print(details);
+                       },
+                       onHorizontalDragUpdate: (details) {
+                           print(details);
+                         if (details.delta.dx > 0) {
+                          moveRight();
+                         } else {
+                            moveLeft();
+                         }
+                       },
+                       child: Container(
+                         child: SizedBox(
+                           width: 300,
+                           child: GridView.builder(
+                               shrinkWrap: true, //do not use up the entire allowable space of parent
+                               physics: const NeverScrollableScrollPhysics(),
+                               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                   childAspectRatio: 1.05,
+                                   crossAxisCount: 10,
+                                   //number of columns
+                                   crossAxisSpacing: 1,
+                                   //gap spacing horizontal between grid elements
+                                   mainAxisSpacing: 1 //gap spacing vertical between grid elements
+                               ),
+                               itemCount: totalSquares,
+                               itemBuilder: (BuildContext ctx, index) {
+                                 //render landed pieces
+                                 if(landedPieces.contains(index)){
+                                   return Container(
+                                       decoration: BoxDecoration(
+                                         color: landedPiecesColors.firstWhere((element) => element['position'] == index)['color'],
+                                         borderRadius: BorderRadius.circular(2),
+                                       )
+                                   );
+                                 }
+                                 //render new piece
+                                 if (newPiece.contains(index)) {
+                                   return Container(
+                                     // child: Text('$index',style: TextStyle(color: Colors.white)),
+                                       decoration: BoxDecoration(
+                                         color: newPieceColor,
+                                         borderRadius: BorderRadius.circular(2),
+                                       )
+                                   );
+                                 } else {
+                                   return Container(
+                                     // child: Text('$index',style: TextStyle(color: Colors.white)),
+                                     decoration: BoxDecoration(color: Colors.black),
+                                   );
+                                 }
+                               }),
                          ),
-                         itemCount: totalSquares,
-                         itemBuilder: (BuildContext ctx, index) {
-                           //render landed pieces
-                           if(landedPieces.contains(index)){
-                             return Container(
-                                 decoration: BoxDecoration(
-                                   color: landedPiecesColors.firstWhere((element) => element['position'] == index)['color'],
-                                   borderRadius: BorderRadius.circular(2),
-                                 )
-                             );
-                           }
-                           //render new piece
-                           if (newPiece.contains(index)) {
-                             return Container(
-                               // child: Text('$index',style: TextStyle(color: Colors.white)),
-                                 decoration: BoxDecoration(
-                                   color: newPieceColor,
-                                   borderRadius: BorderRadius.circular(2),
-                                 )
-                             );
-                           } else {
-                             return Container(
-                               // child: Text('$index',style: TextStyle(color: Colors.white)),
-                               decoration: BoxDecoration(color: Colors.black),
-                             );
-                           }
-                         }),
-                   ),
-                 ),
-                   Visibility(
-                     visible: !showGameGrid,
-                     child: Container(
-                         child: TextButton(
-                           style: TextButton.styleFrom(foregroundColor: Colors.black, backgroundColor: Colors.white, padding: EdgeInsets.all(20)),
-                           onPressed: () {
-                              resetGame();
-                           },
-                           child: Text('Play Again'),
-                         )
+                       ),
                      ),
+                       Visibility(
+                         visible: !showGameGrid,
+                         child: Container(
+                             child: TextButton(
+                               style: TextButton.styleFrom(foregroundColor: Colors.black, backgroundColor: Colors.white, padding: EdgeInsets.all(20)),
+                               onPressed: () {
+                                  resetGame();
+                               },
+                               child: Text('Play Again'),
+                             )
+                         ),
+                       ),
+                       Visibility(
+                         visible: showPlayButton,
+                         child: Container(
+                             child: TextButton(
+                               style: TextButton.styleFrom(foregroundColor: Colors.black, backgroundColor: Colors.white, padding: EdgeInsets.all(20)),
+                               onPressed: () {
+                                 resetGame();
+                               },
+                               child: Text('Play'),
+                             )
+                         ),
+                       ),
+                       Positioned(
+                         top: 50,
+                         child: Container(
+
+                           child: score >0? Text('${score}',style:TextStyle(color: Colors.white,fontSize: 25)): Text(''),
+                         ),
+                       ),
+                     ],
+
                    ),
-                 ]
-               ),
-                Container(
-                  height: 50,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Container(
-                        child: IconButton(
-                          icon: const Icon(Icons.play_circle_fill,
-                            color: Colors.white, size: 30.0,),
-                          onPressed: () {
-                                resetGame();
-                          },
-                        ),
-                      ),
-                      Container(
-                        child: IconButton(
-                          icon: const Icon(Icons.arrow_back,
-                            color: Colors.white, size: 30.0,),
-                          onPressed: () {
-                           moveLeft();
-                          },
-                        ),
-                      ),
-                      Container(
-                        child: IconButton(icon: const Icon(Icons.arrow_forward,
-                          color: Colors.white, size: 30.0,),
-                          onPressed: () {
-                              moveRight();
-                          },
-                        ),
-                      ),
-                      // Container(
-                      //   child: IconButton(icon: const Icon(Icons.arrow_circle_down_sharp,
-                      //     color: Colors.white, size: 30.0,),
-                      //     onPressed: () {
-                      //       setState(() {
-                      //
-                      //       });
-                      //     },
-                      //   ),
-                      //
-                      //
-                      // ),
-                      Container(
-                        child: IconButton(icon: const Icon(Icons.rotate_right,
-                          color: Colors.white, size: 30.0,),
-                          onPressed: () {
-                            rotatePieceCW(newPieceID);
-                            setState(() {
 
-                            });
-                          },
-                        ),
-                      ),
-                      Container(
-                        child: Text('$rotateDirection', style: TextStyle(
-                            color: Colors.white)
-                        ),
-                      ),
+                    Center(
+                      child: Container(
+                        width: 360,
+                        child: Row(
+                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Container(
+                              child: IconButton(
+                                icon: const Icon(Icons.arrow_back,
+                                  color: Colors.white, size: 30.0,),
+                                onPressed: () {
+                                 moveLeft();
+                                },
+                              ),
+                            ),
+                            Container(
+                              child: IconButton(icon: const Icon(Icons.arrow_forward,
+                                color: Colors.white, size: 30.0,),
+                                onPressed: () {
+                                    moveRight();
+                                },
+                              ),
+                            ),
+                            // Container(
+                            //   child: IconButton(icon: const Icon(Icons.arrow_circle_down_sharp,
+                            //     color: Colors.white, size: 30.0,),
+                            //     onPressed: () {
+                            //       setState(() {
+                            //
+                            //       });
+                            //     },
+                            //   ),
+                            //
+                            //
+                            // ),
+                            Container(
+                              child: IconButton(icon: const Icon(Icons.rotate_right,
+                                color: Colors.white, size: 30.0,),
+                                onPressed: () {
+                                  rotatePieceCW(newPieceID);
+                                  setState(() {
 
-                    ],
-                  ),
-                )
-              ],
+                                  });
+                                },
+                              ),
+                            ),
+                            Container(
+                              child: Text('$rotateDirection', style: TextStyle(
+                                  color: Colors.white)
+                              ),
+                            ),
+
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
             ),
           ),
 
